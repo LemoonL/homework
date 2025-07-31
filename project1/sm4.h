@@ -17,7 +17,7 @@ private:
 
     uint32_t F(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3, uint32_t rk);
     uint32_t T(uint32_t x);
-    uint32_t L(uint32_t x);
+    virtual uint32_t L(uint32_t x);
     uint32_t tau(uint32_t x);
 
     static uint8_t Sbox[256];

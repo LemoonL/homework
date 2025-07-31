@@ -1,10 +1,13 @@
 #include "sm4.h"
 #include "sm4_table.h"
+#include "sm4gcm.h"
 #include <iostream>
 #include <iomanip>
 #include <chrono>
 #include <vector>
 #include <thread>
+#include <cstring>
+#include "sm4_vprold.h"
 
 void printBlock(const uint8_t block[16]) {
     for (int i = 0; i < 16; ++i)
@@ -135,6 +138,42 @@ int main() {
     std::cout << "查表单线程: " << (input == out_table_s ? "正确" : "错误") << "\n";
     std::cout << "原始多线程: " << (input == out_orig_mt ? "正确" : "错误") << "\n";
     std::cout << "查表多线程: " << (input == out_table_mt ? "正确" : "错误") << "\n";
+
+    sm4_vprold cipher_vprold;
+    cipher_vprold.setKey(key);
+    std::vector<uint8_t> out_vprold(input.size());
+
+    auto t_vprold_start = std::chrono::high_resolution_clock::now();
+    // 单线程加解密
+    size_t numBlocks = input.size() / 16;
+    std::vector<uint8_t> tmp_vprold(input.size());
+    for (size_t i = 0; i < numBlocks; ++i)
+        cipher_vprold.encryptBlock(&input[i * 16], &tmp_vprold[i * 16]);
+    for (size_t i = 0; i < numBlocks; ++i)
+        cipher_vprold.decryptBlock(&tmp_vprold[i * 16], &out_vprold[i * 16]);
+    auto t_vprold_end = std::chrono::high_resolution_clock::now();
+    std::cout << "VPROLD 验证结果: " << (input == out_vprold ? "正确" : "错误") << "\n";
+
+
+
+    // SM4-GCM 测试
+    std::cout << "\n========== SM4-GCM 测试 ==========" << std::endl;
+    uint8_t iv[12] = { 0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac };
+    uint8_t plaintext[32] = "This is a message to encrypt.";
+    uint8_t ciphertext[32], decrypted[32], tag[16];
+
+    sm4gcm gcm(key, iv, 12);
+    gcm.encrypt(plaintext, 32, nullptr, 0, ciphertext, tag);
+
+    std::cout << "明文:     "; printBlock(plaintext);
+    std::cout << "密文:     "; printBlock(ciphertext);
+    std::cout << "Tag:     "; printBlock(tag);
+
+    bool ok = gcm.decrypt(ciphertext, 32, nullptr, 0, tag, decrypted);
+    std::cout << "解密成功: " << (ok ? "是" : "否") << std::endl;
+    if (ok) {
+        std::cout << "解密后:   "; printBlock(decrypted);
+    }
 
     return 0;
 }
