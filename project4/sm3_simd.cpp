@@ -124,7 +124,6 @@ void SM3_SIMD::processBlock(const uint8_t block[64]) {
     }
 
     // 消息扩展，利用 SSE 优化部分
-    // 这里演示一个简单的SSE辅助旋转实现，你也可以用 _mm_xor_si128 等做更复杂并行
     for (int j = 16; j < 68; j++) {
         uint32_t tmp = P_1(W[j - 16] ^ W[j - 9] ^ rotate_left(W[j - 3], 15));
         W[j] = tmp ^ rotate_left(W[j - 13], 7) ^ W[j - 6];

@@ -13,7 +13,8 @@ public:
     void update(const uint8_t* data, size_t len);
     void update(const std::vector<uint8_t>& data);
     void update(const std::string& data);
-
+    void setIV(const uint32_t iv_[8]);
+    void setTotalLen(uint64_t len);
     // 计算最终哈希结果
     void finalize(uint8_t hash[32]);
     std::vector<uint8_t> digest(); // 返回 std::vector 形式的 hash 值

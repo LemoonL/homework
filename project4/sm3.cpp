@@ -61,7 +61,12 @@ void SM3::update(const std::vector<uint8_t>& data) {
 void SM3::update(const std::string& data) {
     update(reinterpret_cast<const uint8_t*>(data.data()), data.size());
 }
-
+void SM3::setIV(const uint32_t iv_[8]) {
+    std::memcpy(this->V, iv_, sizeof(this->V));
+}
+void SM3::setTotalLen(uint64_t len) {
+    this->totalLen = len;
+}
 void SM3::pad() {
     size_t len = buffer.size();
     buffer.push_back(0x80); // œ»ÃÌº”1Œª1
