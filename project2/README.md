@@ -13,20 +13,24 @@
 离散余弦变换（DCT）是一种将信号从空间域转换到频率域的数学工具，广泛应用于图像压缩和水印技术中。其公式如下：
 
 对于一个二维图像块 $f(x, y)$，其二维DCT变换定义为：
+
 $$
 F(u, v) = \frac{1}{4} C(u)C(v) \sum_{x=0}^{N-1} \sum_{y=0}^{N-1} f(x, y) \cos\left[\frac{(2x+1)u\pi}{2N}\right] \cos\left[\frac{(2y+1)v\pi}{2N}\right]
 $$
+
 其中：
 - $N$ 是图像块的大小（通常为 $8 \times 8$）。
 - $C(u)$ 和 $C(v)$ 是归一化系数：
-  $$
+- 
+$$
   C(u) = \begin{cases} 
   \frac{1}{\sqrt{2}}, & u = 0 \\
   1, & u > 0
   \end{cases}
-  $$
+$$
 
 DCT 的逆变换（IDCT）用于将频率域信号还原到空间域，其公式为：
+
 $$
  f(x, y) = \frac{1}{4} \sum_{u=0}^{N-1} \sum_{v=0}^{N-1} C(u)C(v) F(u, v) \cos\left[\frac{(2x+1)u\pi}{2N}\right] \cos\left[\frac{(2y+1)v\pi}{2N}\right]
 $$
