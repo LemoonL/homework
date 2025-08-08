@@ -91,7 +91,7 @@ Montgomery阶梯法更适合对抗侧信道攻击的高安全场景或硬件实�
 ### 优化结果分析
 窗口法优化的实验结果见下图：
 
-![](result\result1.png)
+![](./result/result1.png)
 
 从图中可以看出，窗口法在加解密效率上相较于未优化实现有一定提升，尤其是在大消息量或多次加解密场景下更为明显。其主要原因在于通过预计算和分组处理，减少了椭圆曲线点加法的次数，提高了整体标量乘法的执行效率。但在窗口大小设置过大时，预计算和内存消耗也会增加，需根据实际场景权衡选择。
 
@@ -144,7 +144,7 @@ d_A = (s + r)^{-1} \cdot (k - s) \bmod n
 $$
 
 ### 测试结果
-![](result\result2.png)
+![](./result/result2.png)
 
 ### 3.2 重用k恢复私钥（同一用户）
 
@@ -188,7 +188,7 @@ d_A = (s_2 - s_1) \cdot (s_1 - s_2 + r_1 - r_2)^{-1} \bmod n
 $$
 
 ### 测试结果
-![](result\result3.png)
+![](./result/result3.png)
 
 ### 3.3 不同用户重用k的交叉攻击
 
@@ -254,7 +254,7 @@ d_B = (s_2 + r_2)^{-1} \cdot (k - s_2) \bmod n
 $$
 
 ### 测试结果
-![](result\result4.png)
+![](./result/result4.png)
 
 ### 3.4 ECDSA与SM2同d,k攻击
 
@@ -339,7 +339,7 @@ $$
 
 
 ### 测试结果
-![](result\result5.png)
+![](./result/result5.png)
 
 ## 四、伪造中本聪的数字签名
 
@@ -385,7 +385,7 @@ $$
   5. 则 $\sigma' = (r', s')$ 是 $e'$ 的有效签名
 
 ### 测试结果
-![](result\result6.png)
+![](./result/result6.png)
 
 
 ---
