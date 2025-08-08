@@ -73,3 +73,64 @@ class SM2:
             raise ValueError("Invalid C3 hash, decryption failed.")
         return M
 
+    def sign(self, message: bytes) -> tuple:
+        e = int.from_bytes(hashlib.sha256(message).digest(), 'big') % n
+        while True:
+            k = secrets.randbelow(n - 1) + 1
+            P1 = k * G
+            r = (e + P1.x()) % n
+            if r == 0 or r + k == n:
+                continue
+            s = ((k - r * self.d) * pow(1 + self.d, -1, n)) % n
+            if s != 0:
+                break
+        return r, s
+
+    def verify(self, message: bytes, signature: tuple, pubkey: ellipticcurve.Point) -> bool:
+        r, s = signature
+        if not (1 <= r <= n - 1 and 1 <= s <= n - 1):
+            return False
+        e = int.from_bytes(hashlib.sha256(message).digest(), 'big') % n
+        t = (r + s) % n
+        if t == 0:
+            return False
+        P1 = s * G + t * pubkey
+        R = (e + P1.x()) % n
+        return R == r
+    
+    @staticmethod
+    def recover_private_key_from_k(r: int, s: int, k: int) -> int:
+        """
+        利用泄露的k和签名(r,s)恢复私钥
+        """
+        t = (s + r) % n
+        if t == 0:
+            raise ValueError("(s + r) must not be 0")
+        t_inv = pow(t, -1, n)  # 模逆元
+        return (k - s) * t_inv % n
+    
+if __name__ == "__main__":
+    sm2 = SM2()
+    pubkey = sm2.get_public_key()
+    
+    message = b"project5"
+
+    print("原文:", message)
+
+    # 加密
+    ciphertext = sm2.encrypt(message, pubkey)
+    print("密文(hex):", ciphertext.hex())
+
+    # 解密
+    plaintext = sm2.decrypt(ciphertext)
+    print("解密结果:", plaintext.decode())
+
+    # 签名
+    signature = sm2.sign(message)
+    print("签名: (r =", hex(signature[0]), ", s =", hex(signature[1]), ")")
+
+    # 验签
+    result = sm2.verify(message, signature, pubkey)
+    print("验签结果:", result)
+
+    

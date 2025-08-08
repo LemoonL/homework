@@ -17,6 +17,8 @@ G = ellipticcurve.Point(curve, Gx, Gy, n)
 # === 预计算窗口大小（可选值：2, 4, 8，越大速度越快，占用内存也更多）===
 WINDOW_SIZE = 8
 
+def int_to_bytes(x: int, size: int) -> bytes:
+    return x.to_bytes(size, byteorder='big')
 
 class SM2_window_opt:
     def __init__(self):
@@ -64,10 +66,40 @@ class SM2_window_opt:
                 break
         C2 = bytes([m[i] ^ t[i] for i in range(len(m))])
         C3 = hashlib.sha256((str(x2) + plaintext + str(y2)).encode()).digest()
-        return (str(C1.x()) + "," + str(C1.y()) + "|" +
-                C2.hex() + "|" + C3.hex()).encode()
-
+        return int_to_bytes(C1.x(), 32) + int_to_bytes(C1.y(), 32) + C3 + C2
+        ##return (str(C1.x()) + "," + str(C1.y()) + "|" +
+                ##C2.hex() + "|" + C3.hex()).encode()
+                
     def decrypt(self, ciphertext: bytes) -> str:
+        # 解析 C1
+        x1 = int.from_bytes(ciphertext[0:32], byteorder='big')
+        y1 = int.from_bytes(ciphertext[32:64], byteorder='big')
+        C1 = ellipticcurve.Point(curve, x1, y1, n)
+
+        # 解析 C3（哈希）和 C2（密文）
+        C3 = ciphertext[64:96]
+        C2 = ciphertext[96:]
+
+        # 计算共享点 S = d * C1
+        S = self.private_key * C1
+        x2, y2 = S.x(), S.y()
+
+        # 生成密钥 t
+        t = hashlib.sha256((str(x2) + str(y2)).encode()).digest()
+        if len(t) < len(C2):
+            raise ValueError("派生密钥长度不足")
+
+        # 解密 C2
+        m = bytes([C2[i] ^ t[i] for i in range(len(C2))])
+
+        # 验证 C3
+        u = hashlib.sha256((str(x2) + m.decode() + str(y2)).encode()).digest()
+        if u != C3:
+            raise ValueError("解密失败，消息认证失败")
+
+        return m.decode()
+
+    def decrypt1(self, ciphertext: bytes) -> str:
         C1_str, C2_hex, C3_hex = ciphertext.decode().split("|")
         x1_str, y1_str = C1_str.split(",")
         C1 = ellipticcurve.Point(curve, int(x1_str), int(y1_str), n)
@@ -80,7 +112,7 @@ class SM2_window_opt:
         if u.hex() != C3_hex:
             raise ValueError("解密失败，消息认证失败")
         return m.decode()
-
+     
     def get_keys(self):
         return self.private_key, self.public_key
 # 测试示例
