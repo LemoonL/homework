@@ -12,8 +12,12 @@ public:
     void encryptBlock(const uint8_t in[16], uint8_t out[16]);
     void decryptBlock(const uint8_t in[16], uint8_t out[16]);
 
+
+protected:
+    uint32_t rk[32];
+
 private:
-    uint32_t rk[32]; // round keys
+    // uint32_t rk[32]; // round keys
 
     uint32_t F(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3, uint32_t rk);
     uint32_t T(uint32_t x);
